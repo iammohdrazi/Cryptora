@@ -141,6 +141,45 @@ The CLI script is useful for automation, scripting, or advanced users.
 
 ---
 
+
+## 🐧 Linux Usage Notes
+
+Cryptora also works on Linux (and macOS). The steps are almost the same as Windows, with two small differences:
+
+- Use `python3` instead of `python`  
+- Use `/` instead of `\` in paths  
+
+### Example (GUI)
+
+```bash
+git clone <repo-url>
+cd Cryptora
+pip install -r requirements.txt
+
+cd src
+python3 -m cryptora.gui
+```
+
+### Example (CLI)
+
+```bash
+cd Cryptora/src
+python3 -m cryptora.cli --help
+
+# Encrypt a file
+python3 -m cryptora.cli encrypt -f path/to/file.txt -k ../keys/cryptora_YYYYMMDD_HHMMSS.key
+
+# Decrypt a file
+python3 -m cryptora.cli decrypt -f path/to/file.txt.enc -k ../keys/cryptora_YYYYMMDD_HHMMSS.key
+```
+
+⚠️ On some Linux distributions you may need to install Tkinter separately:
+
+```bash
+sudo apt-get install python3-tk
+```
+
+
 ## 📜 License & Trademark
 
 This project is under the **MIT License**. See [LICENSE](./LICENSE).
@@ -149,3 +188,6 @@ The name **Cryptora** (™) is a claimed trademark.
 
 * Free for non-commercial, personal, or educational use.
 * Commercial use requires permission.
+
+
+---
