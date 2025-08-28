@@ -29,9 +29,6 @@ def load_key(path):
 
 def list_keys():
     """List all .key files and show the latest one"""
-    if not os.path.exists(KEYS_DIR):
-        print(f"No keys directory found at: {KEYS_DIR}")
-        return None
     keys = [f for f in os.listdir(KEYS_DIR) if f.endswith(".key")]
     if not keys:
         print("No keys found.")
@@ -46,13 +43,29 @@ def list_keys():
 
 def get_latest_key():
     """Return latest key path silently"""
-    if not os.path.exists(KEYS_DIR):
-        return None
     keys = [f for f in os.listdir(KEYS_DIR) if f.endswith(".key")]
     if not keys:
         return None
     latest_key = sorted(keys)[-1]
     return os.path.join(KEYS_DIR, latest_key)
+
+def select_key_interactively():
+    """Ask user to pick a key from the available keys"""
+    keys = [f for f in os.listdir(KEYS_DIR) if f.endswith(".key")]
+    if not keys:
+        print("No keys found. Generate one first.")
+        return None
+    keys_sorted = sorted(keys)
+    print("Select a key from the list below:")
+    for idx, k in enumerate(keys_sorted, 1):
+        print(f"{idx}. {k}")
+    while True:
+        choice = input(f"Enter number (1-{len(keys_sorted)}) or press Enter for latest: ").strip()
+        if choice == "":
+            return os.path.join(KEYS_DIR, keys_sorted[-1])
+        if choice.isdigit() and 1 <= int(choice) <= len(keys_sorted):
+            return os.path.join(KEYS_DIR, keys_sorted[int(choice)-1])
+        print("Invalid choice, try again.")
 
 # ---------------- File Encryption ----------------
 def encrypt_file(file_path, key_path):
@@ -119,6 +132,7 @@ def main():
     parser.add_argument("action", choices=["encrypt", "decrypt", "genkey", "listkeys"], help="Action to perform")
     parser.add_argument("-f", "--file", help="File path to encrypt/decrypt")
     parser.add_argument("-k", "--key", help="Key file path (default: latest key)")
+    parser.add_argument("--selectkey", action="store_true", help="Interactively select a key from available keys")
     args = parser.parse_args()
 
     if args.action == "genkey":
@@ -129,16 +143,22 @@ def main():
         list_keys()
         return
 
-    # Default key handling
-    key_path = args.key if args.key else get_latest_key()
-    if not key_path:
-        print("No key found. Generate a key first using 'genkey'.")
-        return
+    # Key selection logic
+    if args.selectkey:
+        key_path = select_key_interactively()
+        if not key_path:
+            return
+    else:
+        key_path = args.key if args.key else get_latest_key()
+        if not key_path:
+            print("No key found. Generate a key first using 'genkey'.")
+            return
 
     if not args.file:
         print("Please provide a file path using -f")
         return
 
+    # Action execution
     if args.action == "encrypt":
         encrypt_file(args.file, key_path)
     elif args.action == "decrypt":
