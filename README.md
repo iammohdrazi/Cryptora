@@ -13,3 +13,12 @@ Cryptora is a Python utility that allows you to encrypt and decrypt files using 
    ```bash
    git clone <repo-url>
    cd Cryptora
+
+
+## License & Trademark
+
+This project is under the **MIT License**. See [LICENSE](./LICENSE).  
+
+The name **Cryptora** (™) is a claimed trademark.  
+- Free for non-commercial, personal, or educational use.  
+- Commercial use requires permission.
