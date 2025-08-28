@@ -1,0 +1,148 @@
+import os
+import datetime
+import argparse
+from cryptography.fernet import Fernet, InvalidToken
+
+# ---------------- Paths ----------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+KEYS_DIR = os.path.join(BASE_DIR, "..", "keys")  # sibling folder of src
+if not os.path.exists(KEYS_DIR):
+    os.makedirs(KEYS_DIR)
+
+# ---------------- Encryption / Decryption Logic ----------------
+def generate_key():
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    key_name = f"cryptora_{timestamp}.key"
+    key_path = os.path.join(KEYS_DIR, key_name)
+    key = Fernet.generate_key()
+    with open(key_path, "wb") as f:
+        f.write(key)
+    print(f"Key generated: {key_path}")
+    return key_path
+
+def load_key(path):
+    if not os.path.exists(path):
+        print(f"Key file not found: {path}")
+        return None
+    with open(path, "rb") as f:
+        return f.read()
+
+def list_keys():
+    """List all .key files and show the latest one"""
+    if not os.path.exists(KEYS_DIR):
+        print(f"No keys directory found at: {KEYS_DIR}")
+        return None
+    keys = [f for f in os.listdir(KEYS_DIR) if f.endswith(".key")]
+    if not keys:
+        print("No keys found.")
+        return None
+    keys_sorted = sorted(keys)
+    print("All keys:")
+    for k in keys_sorted:
+        print(f" - {k}")
+    latest_key = keys_sorted[-1]
+    print(f"Latest key: {latest_key}")
+    return os.path.join(KEYS_DIR, latest_key)
+
+def get_latest_key():
+    """Return latest key path silently"""
+    if not os.path.exists(KEYS_DIR):
+        return None
+    keys = [f for f in os.listdir(KEYS_DIR) if f.endswith(".key")]
+    if not keys:
+        return None
+    latest_key = sorted(keys)[-1]
+    return os.path.join(KEYS_DIR, latest_key)
+
+# ---------------- File Encryption ----------------
+def encrypt_file(file_path, key_path):
+    if not os.path.exists(file_path):
+        print("File not found.")
+        return
+    if not os.path.exists(key_path):
+        print("Key not found.")
+        return
+    if ".enc_" in file_path:
+        print("File is already encrypted.")
+        return
+
+    try:
+        key = load_key(key_path)
+        fernet = Fernet(key)
+        with open(file_path, "rb") as f:
+            data = f.read()
+        encrypted = fernet.encrypt(data)
+
+        key_name = os.path.splitext(os.path.basename(key_path))[0]
+        output_file = file_path + f".enc_{key_name}"
+
+        with open(output_file, "wb") as f:
+            f.write(encrypted)
+
+        print(f"File encrypted: {output_file}")
+        print(f"Used key: {key_path}")
+    except Exception as e:
+        print(f"Encryption error: {str(e)}")
+
+# ---------------- File Decryption ----------------
+def decrypt_file(file_path, key_path):
+    if not os.path.exists(file_path):
+        print("File not found.")
+        return
+    if not os.path.exists(key_path):
+        print("Key not found.")
+        return
+    if ".enc_" not in file_path:
+        print("This file does not appear to be encrypted.")
+        return
+
+    try:
+        key = load_key(key_path)
+        fernet = Fernet(key)
+        with open(file_path, "rb") as f:
+            decrypted = fernet.decrypt(f.read())
+
+        output_file = file_path.split(".enc_")[0]
+        with open(output_file, "wb") as f:
+            f.write(decrypted)
+
+        print(f"File decrypted: {output_file}")
+        print(f"Used key: {key_path}")
+    except InvalidToken:
+        print("Decryption failed: Incorrect key for this file.")
+    except Exception as e:
+        print(f"Decryption error: {str(e)}")
+
+# ---------------- CLI ----------------
+def main():
+    parser = argparse.ArgumentParser(description="Cryptora - File Encryption/Decryption CLI")
+    parser.add_argument("action", choices=["encrypt", "decrypt", "genkey", "listkeys"], help="Action to perform")
+    parser.add_argument("-f", "--file", help="File path to encrypt/decrypt")
+    parser.add_argument("-k", "--key", help="Key file path (default: latest key)")
+    args = parser.parse_args()
+
+    if args.action == "genkey":
+        generate_key()
+        return
+
+    if args.action == "listkeys":
+        list_keys()
+        return
+
+    # Default key handling
+    key_path = args.key if args.key else get_latest_key()
+    if not key_path:
+        print("No key found. Generate a key first using 'genkey'.")
+        return
+
+    if not args.file:
+        print("Please provide a file path using -f")
+        return
+
+    if args.action == "encrypt":
+        encrypt_file(args.file, key_path)
+    elif args.action == "decrypt":
+        decrypt_file(args.file, key_path)
+
+if __name__ == "__main__":
+    main()
