@@ -144,16 +144,13 @@ The CLI script is useful for automation, scripting, or advanced users.
 
 ## 🐧 Linux Usage Notes
 
-Cryptora also works on Linux (and macOS). The steps are almost the same as Windows, with two small differences:
-
-- Use `python3` instead of `python`  
-- Use `/` instead of `\` in paths  
-
 ### Example (GUI)
 
 ```bash
 git clone <repo-url>
 cd Cryptora
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 
 cd src
