@@ -1,9 +1,16 @@
 import os
+import sys
 import datetime
 from tkinter import Tk, Label, Button, filedialog, StringVar, Frame, Entry, END
 from cryptography.fernet import Fernet, InvalidToken
 
-KEYS_DIR = "keys"
+# ---------------- Paths ----------------
+if getattr(sys, 'frozen', False):  # running as exe
+    BASE_DIR = os.path.dirname(sys.executable)
+else:  # running as script
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+KEYS_DIR = os.path.join(BASE_DIR, "keys")
 if not os.path.exists(KEYS_DIR):
     os.makedirs(KEYS_DIR)
 
@@ -31,7 +38,7 @@ def update_message(text):
     message_var.set(text)
 
 def check_existing_key():
-    keys = sorted(os.listdir(KEYS_DIR))
+    keys = sorted([f for f in os.listdir(KEYS_DIR) if f.endswith(".key")])
     if keys:
         update_message(f"Found {len(keys)} key(s). Latest: {keys[-1]}")
     else:

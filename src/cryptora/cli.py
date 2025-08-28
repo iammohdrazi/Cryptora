@@ -1,11 +1,16 @@
 import os
+import sys
 import datetime
 import argparse
 from cryptography.fernet import Fernet, InvalidToken
 
 # ---------------- Paths ----------------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-KEYS_DIR = os.path.join(BASE_DIR, "..", "keys")  # sibling folder of src
+if getattr(sys, 'frozen', False):  # running as exe
+    BASE_DIR = os.path.dirname(sys.executable)
+else:  # running as script
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+KEYS_DIR = os.path.join(BASE_DIR, "keys")
 if not os.path.exists(KEYS_DIR):
     os.makedirs(KEYS_DIR)
 
@@ -28,7 +33,6 @@ def load_key(path):
         return f.read()
 
 def list_keys():
-    """List all .key files and show the latest one"""
     keys = [f for f in os.listdir(KEYS_DIR) if f.endswith(".key")]
     if not keys:
         print("No keys found.")
@@ -42,7 +46,6 @@ def list_keys():
     return os.path.join(KEYS_DIR, latest_key)
 
 def get_latest_key():
-    """Return latest key path silently"""
     keys = [f for f in os.listdir(KEYS_DIR) if f.endswith(".key")]
     if not keys:
         return None
@@ -50,7 +53,6 @@ def get_latest_key():
     return os.path.join(KEYS_DIR, latest_key)
 
 def select_key_interactively():
-    """Ask user to pick a key from the available keys"""
     keys = [f for f in os.listdir(KEYS_DIR) if f.endswith(".key")]
     if not keys:
         print("No keys found. Generate one first.")
@@ -143,7 +145,6 @@ def main():
         list_keys()
         return
 
-    # Key selection logic
     if args.selectkey:
         key_path = select_key_interactively()
         if not key_path:
@@ -158,7 +159,6 @@ def main():
         print("Please provide a file path using -f")
         return
 
-    # Action execution
     if args.action == "encrypt":
         encrypt_file(args.file, key_path)
     elif args.action == "decrypt":
