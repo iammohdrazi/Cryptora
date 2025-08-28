@@ -19,7 +19,7 @@ It provides both a **GUI application** and a **CLI script**.
    ```bash
    git clone <repo-url>
    cd Cryptora
-````
+   ```
 
 2. Install dependencies:
 
