@@ -180,12 +180,6 @@ python3 -m cryptora.cli encrypt -f path/to/file.txt -k ../keys/cryptora_YYYYMMDD
 python3 -m cryptora.cli decrypt -f path/to/file.txt.enc -k ../keys/cryptora_YYYYMMDD_HHMMSS.key
 ```
 
-⚠️ On some Linux distributions you may need to install Tkinter separately:
-
-```bash
-sudo apt-get install python3-tk
-```
-
 
 ## 📜 License & Trademark
 
