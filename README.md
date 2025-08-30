@@ -153,6 +153,15 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
+<If GUI fails to load few lib>
+sudo apt update && sudo apt install -y \
+libxcb-xinerama0 libxcb-xinerama0-dev libx11-xcb1 libxrender1 libxext6 libxfixes3 libx11-dev \
+libxcb1 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 \
+libxcb-shm0 libxcb-sync1 libxcb-xfixes0
+
+source venv/bin/activate
+export QT_QPA_PLATFORM=xcb
+
 cd src
 python3 -m cryptora.gui
 ```
